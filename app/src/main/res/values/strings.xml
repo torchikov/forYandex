@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">For Yandex</string>
+    <string name="title_main_activity">Исполнители</string>
+    <string name="albums_and_songs">%1$s альбомов, %2$s песен</string>
+    <string name="artist_albums_and_tracks">%1$s альбомов &#160;  &#8226; &#160;  %2$s песен</string>
+    <string name="artist_header_of_description">Биография</string>
+</resources>
