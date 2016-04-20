@@ -29,7 +29,9 @@ public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.
         final long artistId = getIntent().getLongExtra(EXTRA_ARTIST_ID, 0);
 
         mViewPager = (ViewPager) findViewById(R.id.artist_view_pager);
-        mViewPager.addOnPageChangeListener(this);
+        if (mViewPager != null) {
+            mViewPager.addOnPageChangeListener(this);
+        }
 
         mArtists = ArtistLab.get(this).getArtists();
 
@@ -50,6 +52,10 @@ public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.
         for (int i = 0; i < mArtists.size(); i++) {
             if (mArtists.get(i).getId() == artistId) {
                 mViewPager.setCurrentItem(i);
+                /*Другого костыля не придумал, т.к. если position == 0, то onPageSelected сам не вызывается*/
+                if (i == 0) {
+                    onPageSelected(0);
+                }
                 break;
             }
         }
@@ -69,7 +75,7 @@ public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.
 
     @Override
     public void onPageSelected(int position) {
-        /*Для установки заголовка Activity для каждого артиста*/
+        /*Для установки заголовка для каждого артиста*/
         Artist artist = mArtists.get(position);
         setTitle(artist.getName());
     }

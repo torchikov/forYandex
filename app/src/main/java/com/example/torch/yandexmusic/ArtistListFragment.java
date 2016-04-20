@@ -1,6 +1,7 @@
 package com.example.torch.yandexmusic;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+
 import java.util.List;
 
 /*Фрагмент с главным списком всех артистов*/
@@ -21,6 +23,23 @@ public class ArtistListFragment extends Fragment {
     private RecyclerView mArtistsRecyclerView;
     private static ArtistAdapter mAdapter;
     private ImageLoader mImageLoader;
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void onArtistSelected(Artist artist);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     public static void updateUI() {
         mAdapter.notifyDataSetChanged();
@@ -83,8 +102,7 @@ public class ArtistListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = ArtistPagerActivity.newIntent(getActivity(), mArtist.getId());
-            startActivity(intent);
+            mCallbacks.onArtistSelected(mArtist);
         }
     }
 

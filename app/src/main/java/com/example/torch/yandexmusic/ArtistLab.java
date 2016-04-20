@@ -48,8 +48,9 @@ public class ArtistLab {
         }
         return artist;
     }
+
     /*Метод для парсинга json*/
-    private void jsonToList(String jsonUrl){
+    private void jsonToList(String jsonUrl) {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(jsonUrl, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -82,20 +83,26 @@ public class ArtistLab {
 //                    Обложки
                         JSONObject coversJSONObject = artistsJSONObject.getJSONObject("cover");
 
+                        String description = artistsJSONObject.getString("description");
+                        String firstLatterSubString = description.substring(0, 1);
+                        firstLatterSubString = firstLatterSubString.toUpperCase();
+                        String subString = description.substring(1);
+                        description = firstLatterSubString + subString;
+
                         artist.setId(artistsJSONObject.getLong("id"));
                         artist.setName(artistsJSONObject.getString("name"));
                         artist.setGenres(genres.toString());
                         artist.setTracks(artistsJSONObject.getInt("tracks"));
                         artist.setAlbums(artistsJSONObject.getInt("albums"));
                         artist.setLink(link);
-                        artist.setDescription(artistsJSONObject.getString("description"));
+                        artist.setDescription(description);
                         artist.setSmallCoverUrl(coversJSONObject.getString("small"));
                         artist.setBigCoverUrl(coversJSONObject.getString("big"));
                         sArtists.add(artist);
-                }
+                    }
                     ArtistListFragment.updateUI();
 
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }

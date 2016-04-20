@@ -1,12 +1,13 @@
 package com.example.torch.yandexmusic;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 /*Хост для главного фрагмента со списком артистов*/
-public class ArtistsListActivity extends AppCompatActivity {
+public class ArtistsListActivity extends AppCompatActivity implements ArtistListFragment.Callbacks {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,4 +25,9 @@ public class ArtistsListActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onArtistSelected(Artist artist) {
+        Intent intent = ArtistPagerActivity.newIntent(this, artist.getId());
+        startActivity(intent);
+    }
 }
