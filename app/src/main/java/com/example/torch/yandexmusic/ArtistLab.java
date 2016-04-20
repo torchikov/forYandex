@@ -1,17 +1,16 @@
 package com.example.torch.yandexmusic;
 
 
-import android.os.AsyncTask;
+import android.content.Context;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,15 +18,18 @@ import java.util.List;
 public class ArtistLab {
     private static ArtistLab sArtistLab;
     private static List<Artist> sArtists;
+    private static Context sContext;
+    private String mJsonString = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
 
-    private ArtistLab() {
+    private ArtistLab(Context context) {
         sArtists = new ArrayList<>();
-        new ParseTask().execute();
+        sContext = context;
+        jsonToList(mJsonString);
     }
 
-    public static ArtistLab get() {
+    public static ArtistLab get(Context context) {
         if (sArtistLab == null) {
-            sArtistLab = new ArtistLab();
+            sArtistLab = new ArtistLab(context);
         }
         return sArtistLab;
     }
@@ -46,97 +48,65 @@ public class ArtistLab {
         }
         return artist;
     }
-
-    /*Внутренний класс для парсинга JSON*/
-    private class ParseTask extends AsyncTask<Void, Void, String> {
-
-        HttpURLConnection mHttpURLConnection;
-        BufferedReader mBufferedReader;
-        String mResultJSON = "";
-
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                URL url = new URL("http://download.cdn.yandex.net/mobilization-2016/artists.json");
-                mHttpURLConnection = (HttpURLConnection) url.openConnection();
-                mHttpURLConnection.setRequestMethod("GET");
-                mHttpURLConnection.setInstanceFollowRedirects(true);
-                mHttpURLConnection.connect();
-
-                InputStream inputStream = mHttpURLConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-
-                mBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-
-                while ((line = mBufferedReader.readLine()) != null) {
-                    buffer.append(line);
-                }
-
-                mResultJSON = buffer.toString();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return mResultJSON;
-        }
-
-
-        @Override
-        protected void onPostExecute(String stringJSON) {
-            super.onPostExecute(stringJSON);
-
-            try {
-//                Массив со всеми артистами
-                JSONArray artists = new JSONArray(stringJSON);
-
-                for (int i = 0; i < artists.length(); i++) {
-                    Artist artist = new Artist();
+    /*Метод для парсинга json*/
+    private void jsonToList(String jsonUrl){
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(jsonUrl, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        Artist artist = new Artist();
 //                  Артист
-                    JSONObject artistsJSONObject = artists.getJSONObject(i);
+                        JSONObject artistsJSONObject = response.getJSONObject(i);
 //                    Массив с жанрами
-                    JSONArray genresJSONArray = artistsJSONObject.getJSONArray("genres");
+                        JSONArray genresJSONArray = artistsJSONObject.getJSONArray("genres");
 
-                    StringBuilder genres = new StringBuilder();
+                        StringBuilder genres = new StringBuilder();
 
-                    for (int j = 0; j < genresJSONArray.length(); j++) {
-                        genres.append(genresJSONArray.getString(j));
-                        if (j == genresJSONArray.length() - 1) {
-                            break;
+                        for (int j = 0; j < genresJSONArray.length(); j++) {
+                            genres.append(genresJSONArray.getString(j));
+                            if (j == genresJSONArray.length() - 1) {
+                                break;
+                            }
+                            genres.append(", ");
                         }
-                        genres.append(", ");
-                    }
 
 //                  Сайт
-                    String link;
-                    try {
-                        link = artistsJSONObject.getString("link");
-                    } catch (Exception e) {
-                        link = "";
-                    }
+                        String link;
+                        try {
+                            link = artistsJSONObject.getString("link");
+                        } catch (Exception e) {
+                            link = "";
+                        }
 
 //                    Обложки
-                    JSONObject coversJSONObject = artistsJSONObject.getJSONObject("cover");
+                        JSONObject coversJSONObject = artistsJSONObject.getJSONObject("cover");
 
-                    artist.setId(artistsJSONObject.getLong("id"));
-                    artist.setName(artistsJSONObject.getString("name"));
-                    artist.setGenres(genres.toString());
-                    artist.setTracks(artistsJSONObject.getInt("tracks"));
-                    artist.setAlbums(artistsJSONObject.getInt("albums"));
-                    artist.setLink(link);
-                    artist.setDescription(artistsJSONObject.getString("description"));
-                    artist.setSmallCoverUrl(coversJSONObject.getString("small"));
-                    artist.setBigCoverUrl(coversJSONObject.getString("big"));
-                    sArtists.add(artist);
+                        artist.setId(artistsJSONObject.getLong("id"));
+                        artist.setName(artistsJSONObject.getString("name"));
+                        artist.setGenres(genres.toString());
+                        artist.setTracks(artistsJSONObject.getInt("tracks"));
+                        artist.setAlbums(artistsJSONObject.getInt("albums"));
+                        artist.setLink(link);
+                        artist.setDescription(artistsJSONObject.getString("description"));
+                        artist.setSmallCoverUrl(coversJSONObject.getString("small"));
+                        artist.setBigCoverUrl(coversJSONObject.getString("big"));
+                        sArtists.add(artist);
                 }
+                    ArtistListFragment.updateUI();
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
             }
-//            Обновляем UI после выполнения задачи
-            ArtistListFragment.updateUI();
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-        }
+            }
+        });
+
+        NetworkUtils.getInstance(sContext).addToRequestQueue(jsonArrayRequest);
+
     }
 }

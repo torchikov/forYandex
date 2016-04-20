@@ -1,12 +1,7 @@
 package com.example.torch.yandexmusic;
 
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,24 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import java.util.List;
 
 /*Фрагмент с главным списком всех артистов*/
@@ -52,11 +33,10 @@ public class ArtistListFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.artists_list, container, false);
 
-        mImageLoader = PicturesUtils.getImageLoader(getActivity().getApplicationContext());
         mArtistsRecyclerView = (RecyclerView) v.findViewById(R.id.artists_list_recycler_view);
         mArtistsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        ArtistLab artistLab = ArtistLab.get();
+        ArtistLab artistLab = ArtistLab.get(getContext());
         List<Artist> artists = artistLab.getArtists();
         mAdapter = new ArtistAdapter(artists);
         mArtistsRecyclerView.setAdapter(mAdapter);
@@ -68,7 +48,7 @@ public class ArtistListFragment extends Fragment {
     /*Holder для RecyclerView*/
     private class ArtistsHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private ImageView mSmallCover;
+        private NetworkImageView mSmallCover;
         private TextView mArtistName;
         private TextView mGenres;
         private TextView mAlbumsAndSongs;
@@ -79,7 +59,7 @@ public class ArtistListFragment extends Fragment {
             super(itemView);
             itemView.setOnClickListener(this);
 
-            mSmallCover = (ImageView) itemView.findViewById(R.id.small_cover_image_view);
+            mSmallCover = (NetworkImageView) itemView.findViewById(R.id.small_cover_image_view);
             mArtistName = (TextView) itemView.findViewById(R.id.artist_name_text_view);
             mGenres = (TextView) itemView.findViewById(R.id.genres_text_view);
             mAlbumsAndSongs = (TextView) itemView.findViewById(R.id.albums_and_songs_text_view);
@@ -96,7 +76,8 @@ public class ArtistListFragment extends Fragment {
             mArtist.setAlbums(artist.getAlbums());
             mAlbumsAndSongs.setText(String.format(getString(R.string.albums_and_songs), mArtist.getAlbums(), mArtist.getTracks()));
             mArtist.setSmallCoverUrl(artist.getSmallCoverUrl());
-            mImageLoader.displayImage(mArtist.getSmallCoverUrl(), mSmallCover);
+            mImageLoader = NetworkUtils.getInstance(getContext()).getImageLoader();
+            mSmallCover.setImageUrl(mArtist.getSmallCoverUrl(), mImageLoader);
 
         }
 

@@ -31,7 +31,7 @@ public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.
         mViewPager = (ViewPager) findViewById(R.id.artist_view_pager);
         mViewPager.addOnPageChangeListener(this);
 
-        mArtists = ArtistLab.get().getArtists();
+        mArtists = ArtistLab.get(this).getArtists();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
