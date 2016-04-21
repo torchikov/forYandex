@@ -16,44 +16,33 @@ public class NetworkUtils {
     private static Context sContext;
     private ImageLoader mImageLoader;
 
-    private NetworkUtils(Context context){
+    private NetworkUtils(Context context) {
         sContext = context;
         mRequestQueue = getRequestQueue();
 
-        mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
-            private final LruCache<String, Bitmap> mCache = new LruCache<>(20);
-            @Override
-            public Bitmap getBitmap(String url) {
-                return mCache.get(url);
-            }
-
-            @Override
-            public void putBitmap(String url, Bitmap bitmap) {
-                mCache.put(url, bitmap);
-            }
-        });
+        mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(sContext));
     }
 
-    public static synchronized NetworkUtils getInstance(Context context){
-        if (sNetworkUtils == null){
+    public static synchronized NetworkUtils getInstance(Context context) {
+        if (sNetworkUtils == null) {
             sNetworkUtils = new NetworkUtils(context);
         }
         return sNetworkUtils;
     }
 
     public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null){
-            mRequestQueue = Volley.newRequestQueue(sContext.getApplicationContext());
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(sContext.getApplicationContext()); /*Стандартные кеш на 5Mb и BasicNetwork в зависимости от версии Android на устройстве*/
         }
         return mRequestQueue;
     }
 
-    public <T> void addToRequestQueue(Request<T> request){
+    public <T> void addToRequestQueue(Request<T> request) {
         getRequestQueue().add(request);
     }
 
-    public ImageLoader getImageLoader(){
-        return  mImageLoader;
+    public ImageLoader getImageLoader() {
+        return mImageLoader;
     }
 
 
