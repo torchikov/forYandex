@@ -16,6 +16,7 @@ import java.util.List;
 /*Хост для фрагментов с детальной информацией об артисте*/
 public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
     private static final String EXTRA_ARTIST_ID = "artist_id";
+    public static final String EXTRA_POSITION_ON_LIST = "position";
 
     private ViewPager mViewPager;
     private List<Artist> mArtists;
@@ -84,5 +85,18 @@ public class ArtistPagerActivity extends AppCompatActivity implements ViewPager.
     public void onPageScrollStateChanged(int state) {
 
     }
+
+    @Nullable
+    @Override
+    public Intent getSupportParentActivityIntent() {
+        Intent intent = super.getSupportParentActivityIntent();
+        if (intent != null) {
+            intent.putExtra(EXTRA_POSITION_ON_LIST, mViewPager.getCurrentItem());
+        }
+        return intent;
+    }
+
+    
+
 
 }

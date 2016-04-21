@@ -132,7 +132,17 @@ public class ArtistListFragment extends Fragment {
             return mArtists.size();
         }
 
-
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Intent intent = getActivity().getIntent();
+        if (intent != null) {
+            int position = intent.getIntExtra(ArtistPagerActivity.EXTRA_POSITION_ON_LIST, 0);
+            if (position >= 2) {
+                mArtistsRecyclerView.scrollToPosition(position - 1);
+            }
+        }
+    }
 }
